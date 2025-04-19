@@ -1,0 +1,47 @@
+updates:
+#in makefile I have updated how to get the libraries
+HDF5_INC=$(shell nc-config --includedir)
+HDF5_LIB=$(shell nc-config --libdir)
+NETCDF4_INC=$(shell nc-config --includedir)
+NETCDF4_LIB=$(shell nc-config --libdir)
+
+
+Steps:
+Cd to MatchupCode_NASA_DT (or DB)
+mkdir ../Bin
+Make (# to compile the code and executable will be in ../Bin)
+Module restore MYENV (if error libraries are not loaded)
+make (again after module restore, if it did not work the first time) 
+ls ../Bin/match_viirs_dt_n20
+
+you need to also create inputs and adjustments as bellow , at the end ./Bin/run match_viirs_dt_n20 yyyy mm dd
+
+Cd AER_VIIRS_EPS_Match.h
+	update path
+	#define AERONET_PATH "../Data/AERONET/"
+	#define AOD_PATH "/data/data314/hliu/DATA/VIIRS_NASA/AERDT_L2_VIIRS_NOAA20/"
+
+I have created batch job to run the code for all days 
+batchrun.sh (which creates the station_location.txt for each day and then run the AER_VIIRS_EPS_Match.h)
+batchjon_run.pbs (and to use a computational node)
+
+Download all aeronet data from 
+https://aeronet.gsfc.nasa.gov/new_web/download_all_v3_inversions.html
+
+Then I created a python code that convert .lv15 for each station into the format that code is looking for, which is for each day had the station name in yyyy/day/ directory format (/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/)
+
+The C++ code need a text file which has the meta dta of the location of AERONET,
+I have created a python code which filter all aeronet staion from nasa site ('https://aeronet.gsfc.nasa.gov/aeronet_locations.txt')
+based on defined location and then based on thier availibilites and create the final text file for us.
+/glade/u/home/sshams/code/AFRICA_SERVIR/aeronet_site_selection_comp_prepare.ipynb
+
+"aeronet_stations_africa_2021_2025.txt"
+copy that file into what C++ code is looking for "aeronet_locations.txt"
+cp aeronet_stations_africa_2021_2025.txt aeronet_locations.txt  
+
+
+
+#Downloading VIIRS data
+we have a python tool which allows downloading VIIRS data from NASA or NOAA and any data products,
+/glade/campaign/acom/acom-da/SERVIR/VIIRS/python_download_buffer/cmrfetch_eosdis.bash (example: ./cmrfetch_eosdis.bash 2022 01 01 365)
+yaml input file are in ../namelist_scripts which can be set with geopgraphical domain and the data products

@@ -1,0 +1,230 @@
+362c362,365
+<    Int16 *tmpData = new Int16[npix];
+---
+>    float *tmpLnd = new float[npix];
+>    float *tmpOcn = new float[npix];
+>    float *tmpLndAe = new float[npix];
+>    float *tmpOcnAe = new float[npix];
+364,365c367,368
+<    dataSetName = "geophysical_data/Optical_Depth_Land_And_Ocean";
+<    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_SHORT, tmpData, 2,
+---
+>    dataSetName = "Aerosol_Optical_Thickness_550_Land_Best_Estimate";
+>    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+367,371c370,371
+<    for (int i=0; i<npix; i++)
+<       *(mr.aod550+offset+i) = tmpData[i]*0.001;
+<       
+<    dataSetName = "geophysical_data/Angstrom_Exponent_1_Ocean";
+<    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_SHORT, tmpData, 2,
+---
+>    dataSetName = "Aerosol_Optical_Thickness_550_Ocean_Best_Estimate";
+>    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpOcn, 2,
+373,377c373,374
+<    for (int i=0; i<npix; i++)
+<       *(mr.ae1+offset+i) = tmpData[i]*0.001;
+<       
+<    dataSetName = "geophysical_data/Angstrom_Exponent_2_Ocean";
+<    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_SHORT, tmpData, 2,
+---
+>    dataSetName = "Angstrom_Exponent_Land_Best_Estimate";
+>    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLndAe, 2,
+379,383c376,377
+<    for (int i=0; i<npix; i++)
+<       *(mr.ae2+offset+i) = tmpData[i]*0.001;
+<       
+<    dataSetName = "geolocation_data/solar_zenith_angle";
+<    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_SHORT, tmpData, 2,
+---
+>    dataSetName = "Angstrom_Exponent_Ocean_Best_Estimate";
+>    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpOcnAe, 2,
+385,386c379,390
+<    for (int i=0; i<npix; i++)
+<       *(mr.solzen+offset+i) = tmpData[i]*0.01;
+---
+>    for (int i=0; i<npix; i++) {
+>       if (tmpLnd[i] > -0.001) {
+>          *(mr.aod550+offset+i) = tmpLnd[i];
+>          *(mr.ae+offset+i) = tmpLndAe[i];
+>          *(mr.lndSea+offset+i) = 1;
+>       }
+>       else {
+>          *(mr.aod550+offset+i) = tmpOcn[i];
+>          *(mr.ae+offset+i) = tmpOcnAe[i];
+>          *(mr.lndSea+offset+i) = 0;
+>       }
+>    }
+388,392d391
+<    dataSetName = "geolocation_data/solar_azimuth_angle";
+<    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_SHORT, tmpData, 2,
+<                        true, start, stride, count, block);
+<    for (int i=0; i<npix; i++)
+<       *(mr.solazi+offset+i) = tmpData[i]*0.01;
+394,395c393,394
+<    dataSetName = "geolocation_data/sensor_zenith_angle";
+<    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_SHORT, tmpData, 2,
+---
+>    dataSetName = "Solar_Zenith_Angle";
+>    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+397,398c396
+<    for (int i=0; i<npix; i++)
+<       *(mr.satzen+offset+i) = tmpData[i]*0.01;
+---
+>    memcpy(mr.solzen+offset, tmpLnd, npix*sizeof(float));
+400,401c398,399
+<    dataSetName = "geolocation_data/sensor_azimuth_angle";
+<    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_SHORT, tmpData, 2,
+---
+>    dataSetName = "Viewing_Zenith_Angle";
+>    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+403,404c401
+<    for (int i=0; i<npix; i++)
+<       *(mr.satazi+offset+i) = tmpData[i]*0.01;
+---
+>    memcpy(mr.satzen+offset, tmpLnd, npix*sizeof(float));
+406,407c403,404
+<    dataSetName = "geophysical_data/Land_Ocean_Quality_Flag";
+<    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_SHORT, tmpData, 2,
+---
+>    dataSetName = "Relative_Azimuth_Angle";
+>    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+409c406
+<    memcpy(mr.qf+offset, tmpData, npix*sizeof(Int16));
+---
+>    memcpy(mr.relazi+offset, tmpLnd, npix*sizeof(float));
+411,412c408,409
+<    dataSetName = "geophysical_data/Land_Sea_Flag";
+<    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_SHORT, tmpData, 2,
+---
+>    dataSetName = "Scattering_Angle";
+>    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+414c411
+<    memcpy(mr.lndSea+offset, tmpData, npix*sizeof(Int16));
+---
+>    memcpy(mr.sctang+offset, tmpLnd, npix*sizeof(float));
+416c413,416
+<    delete[] tmpData;
+---
+>    delete[] tmpLnd;
+>    delete[] tmpOcn;
+>    delete[] tmpLndAe;
+>    delete[] tmpOcnAe;
+439c439
+<    status = getH5DataDim2(aodFile, "geolocation_data/longitude", num_row, num_col);
+---
+>    status = getH5DataDim2(aodFile, "Longitude", num_row, num_col);
+447c447
+<       status = readH5Data(aodFile, "geolocation_data/longitude", H5T_NATIVE_FLOAT, granLon, 2);
+---
+>       status = readH5Data(aodFile, "Longitude", H5T_NATIVE_FLOAT, granLon, 2);
+452c452
+<       status = readH5Data(aodFile, "geolocation_data/latitude", H5T_NATIVE_FLOAT, granLat, 2);
+---
+>       status = readH5Data(aodFile, "Latitude", H5T_NATIVE_FLOAT, granLat, 2);
+777d776
+<    mr.solazi = new float[np];
+779c778,779
+<    mr.satazi = new float[np];
+---
+>    mr.relazi = new float[np];
+>    mr.sctang = new float[np];
+783,785c783
+<    mr.ae1 = new float[np];
+<    mr.ae2 = new float[np];
+<    mr.qf = new short int[np];
+---
+>    mr.ae = new float[np];
+787,791d784
+<    for (int i=0; i<np; i++) {
+<       *(mr.aod550+i) = MISVAL_FLOAT;
+<       *(mr.ae1+i) = MISVAL_FLOAT;
+<       *(mr.ae2+i) = MISVAL_FLOAT;
+<    }
+815,817c808
+<       float *ae1 = new float[np];
+<       float *ae2 = new float[np];
+<       Int16*qf = new Int16[np];
+---
+>       float *ae = new float[np];
+820c811
+<       float *solazi = new float[np];
+---
+>       float *relazi = new float[np];
+822c813
+<       float *satazi = new float[np];
+---
+>       float *sctang = new float[np];
+829,831c820
+<             *(ae1+n) = *(mr.ae1+i);
+<             *(ae2+n) = *(mr.ae2+i);
+<             *(qf+n) = *(mr.qf+i);
+---
+>             *(ae+n) = *(mr.ae+i);
+834c823
+<             *(solazi+n) = *(mr.solazi+i);
+---
+>             *(relazi+n) = *(mr.relazi+i);
+836c825
+<             *(satazi+n) = *(mr.satazi+i);
+---
+>             *(sctang+n) = *(mr.sctang+i);
+844,846c833
+<       delete[] mr.ae1;
+<       delete[] mr.ae2;
+<       delete[] mr.qf;
+---
+>       delete[] mr.ae;
+849c836
+<       delete[] mr.solazi;
+---
+>       delete[] mr.relazi;
+851c838
+<       delete[] mr.satazi;
+---
+>       delete[] mr.sctang;
+857,859c844
+<       mr.ae1 = ae1;
+<       mr.ae2 = ae2;
+<       mr.qf = qf;
+---
+>       mr.ae = ae;
+862c847
+<       mr.solazi = solazi;
+---
+>       mr.relazi = relazi;
+864c849
+<       mr.satazi = satazi;
+---
+>       mr.sctang = sctang;
+871,873c856
+<       delete[] mr.ae1;
+<       delete[] mr.ae2;
+<       delete[] mr.qf;
+---
+>       delete[] mr.ae;
+876c859
+<       delete[] mr.solazi;
+---
+>       delete[] mr.relazi;
+878c861
+<       delete[] mr.satazi;
+---
+>       delete[] mr.sctang;
+959c942
+<    string aerStaListFile = AERONET_PATH+"aeronet_locations.txt";
+---
+>    string aerStaListFile = AERONET_PATH+"aeronet_locations_v3.txt";
+1329c1312
+<       delete[] mr.solazi;
+---
+>       delete[] mr.relazi;
+1331c1314
+<       delete[] mr.satazi;
+---
+>       delete[] mr.sctang;
+1336,1338c1319
+<       delete[] mr.ae1;
+<       delete[] mr.ae2;
+<       delete[] mr.qf;
+---
+>       delete[] mr.ae;
