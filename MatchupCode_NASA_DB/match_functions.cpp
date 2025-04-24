@@ -9,6 +9,9 @@
 #include <dirent.h>
 #include <cstring>
 #include <unistd.h>
+#include <cmath>
+#include <vector>
+#include <stdexcept>
 #include "AER_VIIRS_EPS_Match.h"
 using namespace std;
 
@@ -119,6 +122,39 @@ string GetStdoutFromCommand(string cmd) {
 }
 /******************************************************************************/
 
+// sshams added for interpolation to get AOD at 550 nm
+float interpolateAOD550(const float wavelengths[], const float aods[], int numWavelengths) {
+   float targetWavelength = 0.550;
+
+   // interpolation of 550 nm AOD using three wavenumbers 440, 500, and 675 nm
+
+   // Extract the three wavelengths and corresponding AOD values
+   float x[3] = {wavelengths[0], wavelengths[1], wavelengths[2]};
+   float y[3] = {aods[0], aods[1], aods[2]};
+
+   // Check for invalid AOD values (-999)
+   for (int i = 0; i < 3; i++) {
+      if (y[i] == -999) {
+         return -999.0;  // Return -999 if any AOD value is invalid
+      }
+   }
+
+   // Perform cubic spline interpolation
+   // Calculate coefficients for the cubic polynomial
+   float a = y[0];
+   float b = (y[1] - y[0]) / (x[1] - x[0]);
+   float c = ((y[2] - y[1]) / (x[2] - x[1]) - b) / (x[2] - x[0]);
+   float d = ((y[2] - y[1]) / (x[2] - x[1]) - b) / ((x[2] - x[0]) * (x[2] - x[1]));
+
+   // Interpolate for 550 nm
+   float dx = targetWavelength - x[0];
+   float interpolatedAOD = a + b * dx + c * dx * dx + d * dx * dx * dx;
+
+   return interpolatedAOD;
+
+   
+}
+/******************************************************************************/
 /* 
    Get AERONET data within a give time window
      -- used to expand the daily data with previous/next day data
@@ -131,29 +167,40 @@ int getAerAod(string fileName, int matchDay, int dayShift, float timeWindow[2], 
       string oneLine;
       int start, end;
       float time;
-      int numPassField = 4;
-      bool dataBegin = false;
+      // int numPassField = 4;
+      // bool dataBegin = false;
       while(getline(staFile, oneLine)) {   /* loop over measurements for one station */
          end = oneLine.find(',', 0);
          if (end == string::npos) continue;  /* bypass the header */
-         if (!dataBegin) {  /* bypass the field naming line */
-            if (oneLine.compare(0,12,"AERONET_Site") == 0) numPassField=5;  // for V1.5
-            dataBegin = true;
-            continue;
-         }
+         // if (!dataBegin) {  /* bypass the field naming line */
+         //    if (oneLine.compare(0,12,"AERONET_Site") == 0) numPassField=5;  // for V1.5
+         //    dataBegin = true;
+         //    continue;
+         // }
          
          /* Bypass the fields:
             V2.0 - Date(dd:mm:yyyy),Time(hh:mm:ss),Day_of_Year,Day_of_Year(Fraction) 
             V1.5 - AERONET_Site,Date(dd:mm:yyyy),Time(hh:mm:ss),Day_of_Year,Day_of_Year(Fraction) */
-         end = -1;
-         for (int i=0; i<numPassField; i++) {
-            start = end+1;
-            end = oneLine.find(',', start);
-         } 
+         // end = -1;
+         // for (int i=0; i<numPassField; i++) {
+         //    start = end+1;
+         //    end = oneLine.find(',', start);
+         // } 
+         // Extract the fractional time
+         start = end + 1;
+         end = oneLine.find(',', start);
          
-         
+         start = end + 1;
+         end = oneLine.find(',', start);
+         // Extract the time field (hh:mm:ss)
+
          time = (float)atof((oneLine.substr(start, end-start)).c_str());
-         if ((int)(time) != matchDay) continue;
+         if ((int)(time) != matchDay) {
+            cout << "Skipping line (time does not match matchDay): time = " << time << ", matchDay = " << matchDay << endl;
+            continue;
+         }
+
+
          time = time - (int)(time);
          //if (abs(time) < 1E-5) time = 1.0; 
          if (time >= timeWindow[0] && time <= timeWindow[1]) {
@@ -163,7 +210,19 @@ int getAerAod(string fileName, int matchDay, int dayShift, float timeWindow[2], 
                end = oneLine.find(',', start);
                oneObs.aods[i] = (float)atof((oneLine.substr(start, end-start)).c_str());
             }
-           obs.push_back(oneObs);
+
+            // Interpolate AOD at 0.550 µm
+            const float interp_550_wavelengths[3] = {0.440, 0.500, 0.675};
+            // Function to extract AOD values for the required wavelengths
+            const float interp_selectedAODs[3] = {
+               oneObs.aods[INDEX_440],  // AOD at 440 nm (18th element, 0-based index is 17)
+               oneObs.aods[INDEX_500],  // AOD at 500 nm (15th element, 0-based index is 14)
+               oneObs.aods[INDEX_675]    // AOD at 675 nm (6th element, 0-based index is 5)
+            };
+
+            oneObs.aod550 = interpolateAOD550(interp_550_wavelengths, interp_selectedAODs, 3);
+
+            obs.push_back(oneObs);
          }
       }  // end of measurements loop for one station
 
@@ -172,6 +231,8 @@ int getAerAod(string fileName, int matchDay, int dayShift, float timeWindow[2], 
    }
    else {
      //cout << "getAerAod(): Cannot open AERONET file "+fileName << endl;
+     cout << "getAerAod(): Cannot open AERONET file: " << fileName << endl;
+
      return PROC_FAIL;
    }
 } 
@@ -352,7 +413,7 @@ int readH5Data(string fileName, string dataSetName,
 /******************************************************************************/
 /* read dark-target VIIRS AOD data */
 
-int readDTAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
+int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
               const int *stride, const int *count, const int *block)
 {
    int    status;
@@ -409,6 +470,11 @@ int readDTAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
                        true, start, stride, count, block);
    memcpy(mr.sctang+offset, tmpLnd, npix*sizeof(float));
+
+   dataSetName ="Aerosol_Optical_Thickness_QA_Flag_Land";
+   status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+      true, start, stride, count, block);
+   memcpy(mr.qf+offset, tmpLnd, npix*sizeof(Int16));
    
    delete[] tmpLnd;
    delete[] tmpOcn;
@@ -939,12 +1005,13 @@ int dayofyear (int yyyymmdd)
 int getAerInfo(map<string,float*>& aerInfo)
 {
    string oneLine;
-   string aerStaListFile = AERONET_PATH+"aeronet_locations_v3.txt";
+   string aerStaListFile = AERONET_PATH+"aeronet_locations.txt";
 
    ifstream aerInfoFile(aerStaListFile.c_str(), ios::in);
    if (aerInfoFile.is_open()) {
-      for (int i=0; i<2; i++) getline(aerInfoFile, oneLine);
-      
+      // for (int i=0; i<2; i++) getline(aerInfoFile, oneLine);
+      // Skip the first line (header)
+      getline(aerInfoFile, oneLine);
       int start, end;
       string staName;
       float  *lonLat;
@@ -987,12 +1054,26 @@ int getDailyAerAod(map<string,float*>& aerInfo, string yyyyddd, vector<OneDayAer
    int day = atoi(yyyyddd.c_str());
    int preDay = dayShift(day, -1);
    int nextDay = dayShift(day, 1);
-   ostringstream str1;
-   str1 << preDay;
-   string preDayStr = str1.str();
-   str1.str("");
-   str1 << nextDay;
-   string nextDayStr = str1.str();
+
+   // update by sshams to follow our filename and folder format
+   // Extract year and day-of-year for current, previous, and next days
+   string currYear = yyyyddd.substr(0, 4);
+   string currDay = yyyyddd.substr(4, 3);
+
+   string preYear = to_string(preDay / 1000);
+   string preDayOfYear = to_string(preDay % 1000);
+   if (preDayOfYear.length() < 3) preDayOfYear = string(3 - preDayOfYear.length(), '0') + preDayOfYear;
+
+   string nextYear = to_string(nextDay / 1000);
+   string nextDayOfYear = to_string(nextDay % 1000);
+   if (nextDayOfYear.length() < 3) nextDayOfYear = string(3 - nextDayOfYear.length(), '0') + nextDayOfYear;
+
+   // ostringstream str1;
+   // str1 << preDay;
+   // string preDayStr = str1.str();
+   // str1.str("");
+   // str1 << nextDay;
+   // string nextDayStr = str1.str();
    
    float halfWindow = MATCH_TIME_WINDOW*0.5/24.;
    float timeWindow[3][2] = {{1.0-halfWindow, 1.0}, {0.0, 1.0}, {0.0, halfWindow}};
@@ -1001,25 +1082,45 @@ int getDailyAerAod(map<string,float*>& aerInfo, string yyyyddd, vector<OneDayAer
    for (map<string,float*>::iterator it=aerInfo.begin(); it!=aerInfo.end(); ++it) {
       string staName = it->first;
 
-      string aerFileName[3] = { AERONET_PATH+preDayStr.substr(0,4)+"/"+preDayStr+"/"+staName+".dat", 
-                                AERONET_PATH+yyyyddd.substr(0,4)+"/"+yyyyddd+"/"+staName+".dat", 
-                                AERONET_PATH+nextDayStr.substr(0,4)+"/"+nextDayStr+"/"+staName+".dat"}; 
+      // sshams updated
+      string aerFileName[3] = {
+         AERONET_PATH + preYear + "/" + preDayOfYear + "/" + staName + ".dat",
+         AERONET_PATH + currYear + "/" + currDay + "/" + staName + ".dat",
+         AERONET_PATH + nextYear + "/" + nextDayOfYear + "/" + staName + ".dat"};
+
+      // Debug print: Print the file paths being checked
+      cout << "Looking for files for station: " << staName << endl;
+      for (int i = 0; i < 3; i++) {
+         cout << "  Checking file: " << aerFileName[i] << endl;
+      }
+      // string aerFileName[3] = { AERONET_PATH+preDayStr.substr(0,4)+"/"+preDayStr+"/"+staName+".dat", 
+      //                           AERONET_PATH+yyyyddd.substr(0,4)+"/"+yyyyddd+"/"+staName+".dat", 
+      //                           AERONET_PATH+nextDayStr.substr(0,4)+"/"+nextDayStr+"/"+staName+".dat"}; 
+      //  sshams updated the code to work if at least one day it is available and can find the data in there
+      /* get AERONET AODs */
+      vector<AerAod> obs;
       bool fileAvailable = false;
       for (int i=0; i<3; i++) {
          if(file_exists(aerFileName[i])) {
             fileAvailable = true;
-            break;
+            status = getAerAod(aerFileName[i], matchDate[i], (i-1), timeWindow[i], obs);
+            // break;
+         }
+         else {
+            // Debug print: File not found
+            cout << "  File not found: " << aerFileName[i] << endl;
          }
       }
       if (!fileAvailable) continue;
       
-      /* get AERONET AODs */
-      vector<AerAod> obs;
-      for (int i=0; i<3; i++) {
-         status = getAerAod(aerFileName[i], matchDate[i], (i-1), timeWindow[i], obs);
-      }
+      
+      // for (int i=0; i<3; i++) {
+      //    status = getAerAod(aerFileName[i], matchDate[i], (i-1), timeWindow[i], obs);
+      // }
       int nobs = obs.size();   /* number of measurements collected for current station */
-      if (nobs == 0) continue;
+      if (nobs == 0) {
+         cout << "No valid observations for station: " << staName << endl;
+          continue;}
       
       /* add current station measurements to the vector */
       OneDayAerAod oneSta;
@@ -1047,7 +1148,8 @@ int getVIIRSgranInfo(string yyyyddd, map<float,string>&granInfo)
    string year = yyyyddd.substr(0,4);
    string dayOfYear = yyyyddd.substr(4,3);
    string command, pout;
-   command = "ls "+AOD_PATH+year+"/"+dayOfYear+"/AER*.A"+yyyyddd+".*.nc";
+   // command = "ls "+AOD_PATH+year+"/"+dayOfYear+"/AER*.A"+yyyyddd+".*.nc";
+   command = "ls "+AOD_PATH+year+"/AERDB*.A"+yyyyddd+".*.nc";
    pout = GetStdoutFromCommand(command);
    
    /* check each granules */
@@ -1248,7 +1350,7 @@ int matchup(string yyyymmdd, vector<OneDayAerAod>& aerData, map<float,string>& g
             /* get AOD data (NetCDF) */
             if (ig == 0) aodFile = it->second;
             else aodFile = nt->second;
-            status = readDTAod(aodFile, mr, offset, start, stride, count, block);
+            status = readDBAod(aodFile, mr, offset, start, stride, count, block);
             //if (status == PROC_FAIL) continue;
             if (status == PROC_FAIL) {
                freeMemForMatch(mr);
@@ -1262,15 +1364,58 @@ int matchup(string yyyymmdd, vector<OneDayAerAod>& aerData, map<float,string>& g
          status = collectAod (mr);
          if (status == PROC_FAIL) continue;
          
+         //sshams added
+         /* Calculate satellite AOD statistics */
+         float sumSatAOD = 0.0;       // Sum of satellite AOD values
+         float sumSatAODSquared = 0.0; // Sum of squared satellite AOD values
+         int nPixs = 0;
+
+         for (int i = 0; i < mr.nPixs; i++) {
+            float aod = mr.aod550[i];
+            if (aod > -1.0) {  // Only include valid AOD values
+               sumSatAOD += aod;
+               sumSatAODSquared += aod * aod;
+               nPixs++;
+              //  cout << mr.aod550[i] << " ";  // Debug: Print AOD values
+            }
+         }
+        //  // Debug: Print intermediate values
+        //  cout << "Number of valid pixels: " << nPixs << endl;
+        //  cout << "Sum of AOD values: " << sumSatAOD << endl;
+        //  cout << "Sum of squared AOD values: " << sumSatAODSquared << endl;
+
+         if (nPixs > 0) {
+            float meanSatAOD = sumSatAOD / nPixs;
+            float stdSatAOD = sqrt((sumSatAODSquared / nPixs) - (meanSatAOD * meanSatAOD));
+           //  cout << "mean: " << meanSatAOD << endl;
+            // Debug: Print the number of valid measurements and the required threshold
+            cout << "***Overlap is found***" <<endl;
+            cout << "Station: " << mr.staName <<endl;
+            cout << "  Satellite Overpass Time: " << mr.satTime << " hours" << endl;
+           // << ", Required: " << NVLDAER << endl;
+            mr.satStd550 = stdSatAOD;  // Store standard deviation of satellite AOD at 550 nm
+            mr.satMean550 = meanSatAOD;  // Store mean satellite AOD at 550 nm
+         } else {
+            mr.satStd550 = -999.0;  // Assign an invalid value if no valid pixels are found
+         }
+
+
          /* collect the AERONET data for the matched pixels */  
          float timeWindow[2] = {(mr.satTime-MATCH_TIME_WINDOW*0.5)/24., 
                                 (mr.satTime+MATCH_TIME_WINDOW*0.5)/24.};
          int nMeas = 0;
          int startIdx = -1;
+         float sumAOD = 0.0;  // **Added: Sum of AOD values**
+         float sumAODSquared = 0.0;  // **Added: Sum of squared AOD values**
          for (int i=0; i<(*ia).nmeas; i++) {
             if (((*ia).meas+i)->time >= timeWindow[0] && ((*ia).meas+i)->time <= timeWindow[1]) {
-               nMeas++;
-               if(startIdx < 0) startIdx = i;
+               float aod = ((*ia).meas + i)->aod550;  // Use the interpolated AOD at 0.550 µm
+               if (aod != -999.0 && !std::isnan(aod)) {  // Skip invalid values
+                  sumAOD += aod;  // **Added: Accumulate AOD values**
+                  sumAODSquared += aod * aod;  // **Added: Accumulate squared AOD values**
+                  nMeas++;
+                  if(startIdx < 0) startIdx = i;
+               }
             }
             else if (((*ia).meas+i)->time > timeWindow[1]) break;
          }
@@ -1280,6 +1425,12 @@ int matchup(string yyyymmdd, vector<OneDayAerAod>& aerData, map<float,string>& g
             continue;
          }
          
+         /* Calculate average and standard deviation */
+         float avgAOD = sumAOD / nMeas;  // **Added: Calculate average AOD**
+         float stdAOD = sqrt((sumAODSquared / nMeas) - (avgAOD * avgAOD));  // **Added: Calculate standard deviation**
+
+         mr.aerMean550 = avgAOD;  // **Store average AERONET AOD at 550 nm**
+         mr.aerStd550 = stdAOD;   // **Store standard deviation of AERONET AOD at 550 nm**   
          mr.nMeas = nMeas;
          mr.meas = new float[nMeas*(NUM_AERONET_WAVELENGTH+1)]; 
          memcpy(mr.meas, (*ia).meas+startIdx, sizeof(float)*nMeas*(NUM_AERONET_WAVELENGTH+1));       

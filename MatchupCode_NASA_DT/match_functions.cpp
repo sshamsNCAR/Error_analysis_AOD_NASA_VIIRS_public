@@ -1438,6 +1438,7 @@ int matchup(string yyyymmdd, vector<OneDayAerAod>& aerData, map<float,string>& g
          status = collectAod (mr);
          if (status == PROC_FAIL) continue;
          
+         //sshams added
           /* Calculate satellite AOD statistics */
           float sumSatAOD = 0.0;       // Sum of satellite AOD values
           float sumSatAODSquared = 0.0; // Sum of squared satellite AOD values

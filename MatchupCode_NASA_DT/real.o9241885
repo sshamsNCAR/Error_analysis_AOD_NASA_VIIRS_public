@@ -28,3 +28,4 @@ alias: usage: alias [-p] [name[=value] ... ]
 alias: usage: alias [-p] [name[=value] ... ]
 /glade/work/rkumar/idl_met/idl_guide5/guide5.sh: line 19: alias: -x: invalid option
 alias: usage: alias [-p] [name[=value] ... ]
+=>> PBS: job killed: walltime 1824 exceeded limit 1800

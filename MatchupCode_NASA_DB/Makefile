@@ -1,10 +1,18 @@
 
-HDF5_INC=/data/starfs1/libs/hdf5-1.8.13/include
-HDF5_LIB=/data/starfs1/libs/hdf5-1.8.13/lib
-NETCDF4_INC=/data/starfs1/libs/netcdf-4.3.2/include
-NETCDF4_LIB=/data/starfs1/libs/netcdf-4.3.2/lib
+# HDF5_INC=/data/starfs1/libs/hdf5-1.8.13/include
+# HDF5_LIB=/data/starfs1/libs/hdf5-1.8.13/lib
+# NETCDF4_INC=/data/starfs1/libs/netcdf-4.3.2/include
+# NETCDF4_LIB=/data/starfs1/libs/netcdf-4.3.2/lib
 LIB64=-L /usr/lib64 -lm
 #LIB64=-L /data/data087/hliu/tools/lib64 -lnsl -lm
+
+
+# sshams updated
+HDF5_INC=$(shell nc-config --includedir)
+HDF5_LIB=$(shell nc-config --libdir)
+NETCDF4_INC=$(shell nc-config --includedir)
+NETCDF4_LIB=$(shell nc-config --libdir)
+
 
 LOCAL_INC=./
 INCS =  -I$(LOCAL_INC) -I${HDF5_INC} -I${NETCDF4_INC}

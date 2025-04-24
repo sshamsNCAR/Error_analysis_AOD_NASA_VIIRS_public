@@ -14,14 +14,16 @@ using namespace std;
 #endif
 
 /****** Data  Paths ******/
-const string AERONET_PATH="../Data/AERONET/";
+// const string AERONET_PATH="../Data/AERONET/";
+const string AERONET_PATH="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/";
 //const string AOD_PATH="/data/data314/hliu/DATA/VIIRS_NASA/AERDT_L2_VIIRS_SNPP/";  // YYYY/DDD/AERDT_L2_VIIRS_SNPP.A2012333.2306.011.2020200031009.nc
 //const string MATCH_PATH="../Data/MATCHUP_DT/";
 //const string AOD_PATH="/data/data314/hliu/DATA/VIIRS_NASA/AERDB_L2_VIIRS_SNPP/";  // YYYY/DDD/AERDB_L2_VIIRS_SNPP.A2012333.2306.011.2020200031009.nc
 //const string MATCH_PATH="../Data/MATCHUP_DB_SNPP/";
-const string AOD_PATH="/data/data314/hliu/DATA/VIIRS_NASA/AERDB_L2_VIIRS_NOAA20/";  // YYYY/DDD/AERDB_L2_VIIRS_NOAA20.A2023004.2124.002.2023080160611.nc
-const string MATCH_PATH="../Data/MATCHUP_DB_NOAA20/";
-
+// const string AOD_PATH="/data/data314/hliu/DATA/VIIRS_NASA/AERDB_L2_VIIRS_NOAA20/";  // YYYY/DDD/AERDB_L2_VIIRS_NOAA20.A2023004.2124.002.2023080160611.nc
+const string AOD_PATH="/glade/campaign/acom/acom-da/SERVIR/VIIRS/python_download_buffer/data-ingest/viirs_data/";
+// const string MATCH_PATH="../Data/MATCHUP_DB_NOAA20/";
+const string MATCH_PATH="/glade/campaign/acom/acom-da/SERVIR/match_aeronet_viirs/matched_DB_1hours_TW/";
 /****** AERONET  Constants (V3) *******/
 const int NUM_AERONET_WAVELENGTH = 22;
 const float AERONET_WAVELENGTH[NUM_AERONET_WAVELENGTH] = 
@@ -29,7 +31,9 @@ const float AERONET_WAVELENGTH[NUM_AERONET_WAVELENGTH] =
                0.560, 0.555, 0.551, 0.532, 0.531, 0.510, 0.500, 0.490, 
                0.443, 0.440, 0.412, 0.400, 0.380, 0.340};
 
-
+const int INDEX_440 = 17;  // 440 nm is the 18th element (0-based index is 17)
+const int INDEX_500 = 14;  // 500 nm is the 15th element (0-based index is 14)
+const int INDEX_675 = 5;   // 675 nm is the 6th element (0-based index is 5)
 
 /****** Matching  Constants ******/
 const int NVLDAER = 2;  /* minimum number of valid AERONET measurements used for averaging */
@@ -43,6 +47,7 @@ const float MAXLAT = 80.;
 typedef struct {  
    float time;  /* fractional hour (0-1)*/
    float aods[NUM_AERONET_WAVELENGTH];
+   float aod550;  // interpolated AOD at 0.55um
 } AerAod;
 
 typedef struct {  
@@ -67,6 +72,8 @@ typedef struct {
    float  staLat;  
    float  *meas;     /* (NUM_AERONET_WAVELENGTH+1)*nmeas
                         time (of day [0-1] + AOD at 22 wavelengths */
+   float aerMean550;  // Mean AERONET AOD at 550 nm
+   float aerStd550;   // Standard deviation of AERONET AOD at 550 nm
    
    // AOD outputs (nPixs)
    float *lon;   
@@ -76,8 +83,11 @@ typedef struct {
    float *relazi;  // Gordon convention: ABS(!PI-relazi)
    float *sctang;
    float *aod550;  // best estimate (QF>1 moderate or good)
+   float satMean550;  // Mean satellite AOD at 550 nm
+   float satStd550;   // Standard deviation of satellite AOD at 550 nm
    float *ae;      // 0.41/0.48 over arid land; 0.48/0.69 over vegetated/mixed land; 0.55/0.865 over ocean
    Int16 *lndSea;  // 0:Ocean 1:Land 
+   Int16 *qf;     // 0: Bad 1:Marginal 2:Good 3:Very Good
 
 } MatchupRecord;
 

@@ -19,7 +19,7 @@ const string AERONET_PATH="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/A
 //const string MATCH_PATH="../Data/MATCHUP_DT/";
 const string AOD_PATH="/glade/campaign/acom/acom-da/SERVIR/VIIRS/python_download_buffer/data-ingest/viirs_data/";  // YYYY/DDD/AERDT_L2_VIIRS_NOAA20.A2024003.0824.002.2024003210456.nc
 // const string MATCH_PATH="/glade/u/home/sshams/code/AFRICA_SERVIR/Error_analysis_AOD_NASA/Data/MATCHUP_DT/";
-const string MATCH_PATH="/glade/campaign/acom/acom-da/SERVIR/match_aeronet_viirs/matched_3hours_TW/"; // we are using differnet time window for matching and save the data in different folder
+const string MATCH_PATH="/glade/campaign/acom/acom-da/SERVIR/match_aeronet_viirs/matched_DT_1hours_TW/"; // we are using differnet time window for matching and save the data in different folder
 
 
 
@@ -37,7 +37,7 @@ const int INDEX_675 = 5;   // 675 nm is the 6th element (0-based index is 5)
 
 /****** Matching  Constants ******/
 const int NVLDAER = 2;  /* minimum number of valid AERONET measurements used for averaging */
-const float MATCH_TIME_WINDOW = 3.0;  /* AERONET matching time window in hour (centered on satellite overpass time) */ 
+const float MATCH_TIME_WINDOW = 1.0;  /* AERONET matching time window in hour (centered on satellite overpass time) */ 
 const float MATCH_RADIUS = 27.5;      /* Satellite retrievals matching spatial domain (radius [km] of circle centered on station)  */ 
 const int MIN_N_MATCH_PIX = 2;      /* Minimum number of pixels within matching domain */
 const float MAXLAT = 80.;
