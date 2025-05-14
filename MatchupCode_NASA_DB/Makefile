@@ -32,6 +32,7 @@ LDFLAGS =
 CXX		= g++
 CXX_COMPILE	= $(CXX) -c $(OPTFLAGS) $(DBGFLAG) $(CFLAGS) $(INCS) 
 CXX_LINK 	= $(CXX) $(LDFLAGS) $(LIBS)
+CXXFLAGS        = -g -O2
 
 SRCS = match_functions.cpp Error_Handler.cpp match_main.cpp
 OBJS = ${SRCS:.cpp=.o}

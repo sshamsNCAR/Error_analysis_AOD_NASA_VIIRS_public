@@ -1,0 +1,12 @@
+#!/bin/bash -l
+#PBS -N real
+#PBS -A NSAP0003 
+#PBS -q main
+#PBS -l walltime=00:30:00
+#PBS -m abe
+#PBS -j oe
+#PBS -l select=1:ncpus=128:mpiprocs=128
+
+
+
+./batchrun.sh 2021 01 2023 365 > ../Bin/DB_batchrun.log 2>&1

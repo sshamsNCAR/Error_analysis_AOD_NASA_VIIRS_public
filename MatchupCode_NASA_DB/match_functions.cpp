@@ -413,75 +413,199 @@ int readH5Data(string fileName, string dataSetName,
 /******************************************************************************/
 /* read dark-target VIIRS AOD data */
 
+// sshams added
 int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
               const int *stride, const int *count, const int *block)
 {
-   int    status;
+   int status;
    string dataSetName;
-   int npix = count[0]*count[1];   
-   
-   float *tmpLnd = new float[npix];
-   float *tmpOcn = new float[npix];
-   float *tmpLndAe = new float[npix];
-   float *tmpOcnAe = new float[npix];
-   
+   int npix = count[0] * count[1];  // Total number of pixels
+
+   // Allocate a single temporary buffer
+   float *tmpData = new float[npix];
+
+   // Read land AOD
    dataSetName = "Aerosol_Optical_Thickness_550_Land_Best_Estimate";
-   status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
-                       true, start, stride, count, block);
-   dataSetName = "Aerosol_Optical_Thickness_550_Ocean_Best_Estimate";
-   status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpOcn, 2,
-                       true, start, stride, count, block);
-   dataSetName = "Angstrom_Exponent_Land_Best_Estimate";
-   status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLndAe, 2,
-                       true, start, stride, count, block);
-   dataSetName = "Angstrom_Exponent_Ocean_Best_Estimate";
-   status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpOcnAe, 2,
-                       true, start, stride, count, block);
-   for (int i=0; i<npix; i++) {
-      if (tmpLnd[i] > -0.001) {
-         *(mr.aod550+offset+i) = tmpLnd[i];
-         *(mr.ae+offset+i) = tmpLndAe[i];
-         *(mr.lndSea+offset+i) = 1;
-      }
-      else {
-         *(mr.aod550+offset+i) = tmpOcn[i];
-         *(mr.ae+offset+i) = tmpOcnAe[i];
-         *(mr.lndSea+offset+i) = 0;
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   if (status < 0) {
+      delete[] tmpData;
+      return PROC_FAIL;
+   }
+
+   // Process land AOD
+   for (int i = 0; i < npix; i++) {
+      if (tmpData[i] > -0.001) {
+         *(mr.aod550 + offset + i) = tmpData[i];
+         *(mr.lndSea + offset + i) = 1;  // Land
       }
    }
-      
-      
-   dataSetName = "Solar_Zenith_Angle";
-   status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
-                       true, start, stride, count, block);
-   memcpy(mr.solzen+offset, tmpLnd, npix*sizeof(float));
-      
-   dataSetName = "Viewing_Zenith_Angle";
-   status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
-                       true, start, stride, count, block);
-   memcpy(mr.satzen+offset, tmpLnd, npix*sizeof(float));
-      
-   dataSetName = "Relative_Azimuth_Angle";
-   status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
-                       true, start, stride, count, block);
-   memcpy(mr.relazi+offset, tmpLnd, npix*sizeof(float));
-      
-   dataSetName = "Scattering_Angle";
-   status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
-                       true, start, stride, count, block);
-   memcpy(mr.sctang+offset, tmpLnd, npix*sizeof(float));
 
-   dataSetName ="Aerosol_Optical_Thickness_QA_Flag_Land";
-   status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
-      true, start, stride, count, block);
-   memcpy(mr.qf+offset, tmpLnd, npix*sizeof(Int16));
-   
-   delete[] tmpLnd;
-   delete[] tmpOcn;
-   delete[] tmpLndAe;
-   delete[] tmpOcnAe;
+   // Read ocean AOD
+   dataSetName = "Aerosol_Optical_Thickness_550_Ocean_Best_Estimate";
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   if (status < 0) {
+      delete[] tmpData;
+      return PROC_FAIL;
+   }
+
+   // Process ocean AOD
+   for (int i = 0; i < npix; i++) {
+      if (*(mr.aod550 + offset + i) <= -0.001) {  // Only update if land AOD is invalid
+         *(mr.aod550 + offset + i) = tmpData[i];
+         *(mr.lndSea + offset + i) = 0;  // Ocean
+      }
+   }
+
+   // Read land Angstrom Exponent
+   dataSetName = "Angstrom_Exponent_Land_Best_Estimate";
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   if (status < 0) {
+      delete[] tmpData;
+      return PROC_FAIL;
+   }
+
+   // Process land Angstrom Exponent
+   for (int i = 0; i < npix; i++) {
+      if (*(mr.lndSea + offset + i) == 1) {  // Only update for land pixels
+         *(mr.ae + offset + i) = tmpData[i];
+      }
+   }
+
+   // Read ocean Angstrom Exponent
+   dataSetName = "Angstrom_Exponent_Ocean_Best_Estimate";
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   if (status < 0) {
+      delete[] tmpData;
+      return PROC_FAIL;
+   }
+
+   // Process ocean Angstrom Exponent
+   for (int i = 0; i < npix; i++) {
+      if (*(mr.lndSea + offset + i) == 0) {  // Only update for ocean pixels
+         *(mr.ae + offset + i) = tmpData[i];
+      }
+   }
+
+   // Read Solar Zenith Angle
+   dataSetName = "Solar_Zenith_Angle";
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   if (status < 0) {
+      delete[] tmpData;
+      return PROC_FAIL;
+   }
+   memcpy(mr.solzen + offset, tmpData, npix * sizeof(float));
+
+   // Read Viewing Zenith Angle
+   dataSetName = "Viewing_Zenith_Angle";
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   if (status < 0) {
+      delete[] tmpData;
+      return PROC_FAIL;
+   }
+   memcpy(mr.satzen + offset, tmpData, npix * sizeof(float));
+
+   // Read Relative Azimuth Angle
+   dataSetName = "Relative_Azimuth_Angle";
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   if (status < 0) {
+      delete[] tmpData;
+      return PROC_FAIL;
+   }
+   memcpy(mr.relazi + offset, tmpData, npix * sizeof(float));
+
+   // Read Scattering Angle
+   dataSetName = "Scattering_Angle";
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   if (status < 0) {
+      delete[] tmpData;
+      return PROC_FAIL;
+   }
+   memcpy(mr.sctang + offset, tmpData, npix * sizeof(float));
+
+   // Read Quality Flag
+   dataSetName = "Aerosol_Optical_Thickness_QA_Flag_Land";
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   if (status < 0) {
+      delete[] tmpData;
+      return PROC_FAIL;
+   }
+   memcpy(mr.qf + offset, tmpData, npix * sizeof(Int16));
+
+   // Clean up temporary buffer
+   delete[] tmpData;
+
    return PROC_SUCCEED;
 }
+
+// int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
+//               const int *stride, const int *count, const int *block)
+// {
+//    int    status;
+//    string dataSetName;
+//    int npix = count[0]*count[1];   
+   
+//    float *tmpLnd = new float[npix];
+//    float *tmpOcn = new float[npix];
+//    float *tmpLndAe = new float[npix];
+//    float *tmpOcnAe = new float[npix];
+   
+//    dataSetName = "Aerosol_Optical_Thickness_550_Land_Best_Estimate";
+//    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+//                        true, start, stride, count, block);
+//    dataSetName = "Aerosol_Optical_Thickness_550_Ocean_Best_Estimate";
+//    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpOcn, 2,
+//                        true, start, stride, count, block);
+//    dataSetName = "Angstrom_Exponent_Land_Best_Estimate";
+//    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLndAe, 2,
+//                        true, start, stride, count, block);
+//    dataSetName = "Angstrom_Exponent_Ocean_Best_Estimate";
+//    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpOcnAe, 2,
+//                        true, start, stride, count, block);
+//    for (int i=0; i<npix; i++) {
+//       if (tmpLnd[i] > -0.001) {
+//          *(mr.aod550+offset+i) = tmpLnd[i];
+//          *(mr.ae+offset+i) = tmpLndAe[i];
+//          *(mr.lndSea+offset+i) = 1;
+//       }
+//       else {
+//          *(mr.aod550+offset+i) = tmpOcn[i];
+//          *(mr.ae+offset+i) = tmpOcnAe[i];
+//          *(mr.lndSea+offset+i) = 0;
+//       }
+//    }
+      
+      
+//    dataSetName = "Solar_Zenith_Angle";
+//    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+//                        true, start, stride, count, block);
+//    memcpy(mr.solzen+offset, tmpLnd, npix*sizeof(float));
+      
+//    dataSetName = "Viewing_Zenith_Angle";
+//    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+//                        true, start, stride, count, block);
+//    memcpy(mr.satzen+offset, tmpLnd, npix*sizeof(float));
+      
+//    dataSetName = "Relative_Azimuth_Angle";
+//    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+//                        true, start, stride, count, block);
+//    memcpy(mr.relazi+offset, tmpLnd, npix*sizeof(float));
+      
+//    dataSetName = "Scattering_Angle";
+//    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+//                        true, start, stride, count, block);
+//    memcpy(mr.sctang+offset, tmpLnd, npix*sizeof(float));
+
+//    dataSetName ="Aerosol_Optical_Thickness_QA_Flag_Land";
+//    status = readH5Data(aodFile,  dataSetName, H5T_NATIVE_FLOAT, tmpLnd, 2,
+//       true, start, stride, count, block);
+//    memcpy(mr.qf+offset, tmpLnd, npix*sizeof(Int16));
+   
+//    delete[] tmpLnd;
+//    delete[] tmpOcn;
+//    delete[] tmpLndAe;
+//    delete[] tmpOcnAe;
+//    return PROC_SUCCEED;
+// }
 
 /******************************************************************************/
 /* 
@@ -848,6 +972,12 @@ void allocMemForMatch (MatchupRecord &mr, int np)
    mr.aod550 = new float[np];
    mr.ae = new float[np];
    mr.lndSea = new short int[np];
+   mr.qf = new short int[np];
+   for (int i=0; i<np; i++) {
+      *(mr.aod550+i) = MISVAL_FLOAT;
+      *(mr.ae+i) = MISVAL_FLOAT;
+      
+   }
 }
 /******************************************************************************/
 /* only collect the pixels with AOD retrievals */

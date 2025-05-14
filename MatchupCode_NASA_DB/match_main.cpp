@@ -77,7 +77,7 @@ int main(int argc, char** argv)
    }
    
    /****** output the match-ups ******/
-   string outFile = MATCH_PATH+"Match_DB_"+yyyyddd+".dat";
+   string outFile = MATCH_PATH+"Match_DB_"+yyyyddd+".csv";
    // ofstream output(outFile.c_str(), ios::out | ios::binary); 
    int nMatch = matchData.size();
    cout << "Writing match-up results to: " << outFile << endl;
