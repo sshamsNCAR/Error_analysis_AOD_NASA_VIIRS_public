@@ -34,7 +34,7 @@ def process_aeronet_file(file_path):
         return
 
      # Ensure the file has the required columns
-    required_columns = ["Date(dd:mm:yyyy)", "Time(hh:mm:ss)","Day_of_Year(Fraction)"] + [f"AOD_{int(w*1000)}nm" for w in AERONET_WAVELENGTHS]+["440-870_Angstrom_Exponent"]
+    required_columns = ["Date(dd:mm:yyyy)", "Time(hh:mm:ss)","Day_of_Year(Fraction)"] + [f"AOD_{int(w*1000)}nm" for w in AERONET_WAVELENGTHS]
     if not all(col in data.columns for col in required_columns):
         print(f"File {file_path} is missing required columns.")
         return
@@ -46,7 +46,6 @@ def process_aeronet_file(file_path):
             date_str = row["Date(dd:mm:yyyy)"]
             time_str = row["Time(hh:mm:ss)"]
             day_of_year_fraction = row["Day_of_Year(Fraction)"]
-            Angstrom_exponent = row["440-870_Angstrom_Exponent"]
             
              # Skip rows with missing AOD values for any wavelength
             if any(pd.isna(row[f"AOD_{int(w*1000)}nm"]) for w in AERONET_WAVELENGTHS):
@@ -67,7 +66,7 @@ def process_aeronet_file(file_path):
                 # Write all wavelengths and their AOD values
                 aod_values = [row[f"AOD_{int(w*1000)}nm"] for w in AERONET_WAVELENGTHS]
                 aod_values_str = ",".join(map(str, aod_values))
-                f.write(f"{date_str},{time_str},{day_of_year_fraction:.6f},{aod_values_str},{Angstrom_exponent}\n")
+                f.write(f"{date_str},{time_str},{day_of_year_fraction:.6f},{aod_values_str}\n")
         except Exception as e:
             print(f"Error processing row in file {file_path}: {e}")
 
@@ -83,9 +82,9 @@ def main():
     all_files.sort()
 
     # Process files in batches
-    #batch_size = 50
-    start_index = 0  # Start from file 50q
-    end_index = 400   # End at file 100
+    batch_size = 50
+    start_index = 1200  # Start from file 50q
+    end_index = 1800   # End at file 100
 
     # Process the first batch (files 50 to 100)
     for file_path in all_files[start_index:end_index]:

@@ -83,7 +83,6 @@ typedef struct {
    float *relazi;  // Gordon convention: ABS(!PI-relazi)
    float *sctang;
    float *aod550;  // best estimate (QF>1 moderate or good)
-   float mean_aeronet_ae;    //"440-870_Angstrom_Exponent"
    float satMean550;  // Mean satellite AOD at 550 nm
    float satStd550;   // Standard deviation of satellite AOD at 550 nm
    float *ae;      // 0.41/0.48 over arid land; 0.48/0.69 over vegetated/mixed land; 0.55/0.865 over ocean

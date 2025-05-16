@@ -28,7 +28,9 @@ batchjon_run.pbs (and to use a computational node)
 Download all aeronet data from 
 https://aeronet.gsfc.nasa.gov/new_web/download_all_v3_inversions.html
 
-Then I created a python code that convert .lv15 for each station into the format that code is looking for, which is for each day had the station name in yyyy/day/ directory format (/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/)
+Then I created a python code that convert .lv15 for each station into the format that code is looking for, which is for each day had the station name in yyyy/day/ directory format
+conversion code:/glade/u/home/sshams/code/AFRICA_SERVIR/Error_analysis_AOD_NASA/create_formatted_aeronet_data.py
+my output dir (/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/)
 
 The C++ code need a text file which has the meta dta of the location of AERONET,
 I have created a python code which filter all aeronet staion from nasa site ('https://aeronet.gsfc.nasa.gov/aeronet_locations.txt')

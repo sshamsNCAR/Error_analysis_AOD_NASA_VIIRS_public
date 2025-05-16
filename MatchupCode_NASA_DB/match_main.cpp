@@ -123,7 +123,7 @@ int main(int argc, char** argv)
             << im->satMean550 << ","  // Mean satellite AOD at 550 nm
             << im->satStd550 << "," // Standard deviation of satellite AOD at 550 nm
             << "\"" << aod550_values.str() << "\","  // AOD at 550 nm for the pixel
-            << "\"" << qf_values.str() << "\"," ; // Quality flag for all pixels (enclosed in quotes);
+            << "\"" << qf_values.str() << "\"" ; // Quality flag for all pixels (enclosed in quotes);
             
    }
    // output.write(reinterpret_cast <const char*>(&nMatch),sizeof(int));

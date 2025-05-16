@@ -9,4 +9,4 @@
 
 
 
-./batchrun.sh 2021 01 2023 365 > ../Bin/DB_batchrun.log 2>&1
+./batchrun.sh 2021 01 2022 365 > ../Bin/DB_batchrun.log 2>&1
