@@ -48,6 +48,7 @@ typedef struct {
    float time;  /* fractional hour (0-1)*/
    float aods[NUM_AERONET_WAVELENGTH];
    float aod550;  // interpolated AOD at 0.55um
+   float ae;      // 440-870 Angstrom Exponent
 } AerAod;
 
 typedef struct {  

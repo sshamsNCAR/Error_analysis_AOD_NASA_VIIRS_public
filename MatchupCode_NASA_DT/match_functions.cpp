@@ -241,6 +241,15 @@ int getAerAod(string fileName, int matchDay, int dayShift, float timeWindow[2], 
             //    cout << oneObs.aods[i] << " ";
             // }
             // cout << endl;
+               // Skip to the 25th column (index 25, last element)
+            
+            // Now end/start points to the AE column
+            start = end+1;
+            // end = oneLine.find(',', start);
+            
+            oneObs.ae = (float)atof((oneLine.substr(start)).c_str());
+            // Debug: Print the extracted AE value
+            // cout << "Extracted AE value: " << oneObs.ae << endl;
             // Interpolate AOD at 0.550 µm
             const float interp_550_wavelengths[3] = {0.440, 0.500, 0.675};
             // Function to extract AOD values for the required wavelengths
@@ -1480,6 +1489,8 @@ int matchup(string yyyymmdd, vector<OneDayAerAod>& aerData, map<float,string>& g
          int startIdx = -1;
          float sumAOD = 0.0;  // **Added: Sum of AOD values**
          float sumAODSquared = 0.0;  // **Added: Sum of squared AOD values**
+         float sumAE = 0.0;          // Sum of AE values
+         int nAE = 0;                // Count of valid AE values
          for (int i=0; i<(*ia).nmeas; i++) {
             if (((*ia).meas+i)->time >= timeWindow[0] && ((*ia).meas+i)->time <= timeWindow[1]) {
                float aod = ((*ia).meas + i)->aod550;  // Use the interpolated AOD at 0.550 µm
@@ -1488,10 +1499,20 @@ int matchup(string yyyymmdd, vector<OneDayAerAod>& aerData, map<float,string>& g
                   sumAODSquared += aod * aod;  // **Added: Accumulate squared AOD values**
                   nMeas++;
                   if(startIdx < 0) startIdx = i;
+                  // --- Add this block for AE ---
+                  float ae = ((*ia).meas + i)->ae;
+                  if (ae != -999.0 && !std::isnan(ae)) {
+                      sumAE += ae;
+                      nAE++;
+                  }
+                  // --- End AE block ---
                }
             }
             else if (((*ia).meas+i)->time > timeWindow[1]) break;
          }
+         float meanAE = (nAE > 0) ? sumAE / nAE : -999.0;
+         mr.mean_aeronet_ae = meanAE;
+
          if (nMeas == 0) {
             cout << "matchup(): AERONET nMeas == 0 for "+(*ia).staName << endl;
             freeMemForMatch(mr);

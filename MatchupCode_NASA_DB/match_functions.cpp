@@ -210,7 +210,12 @@ int getAerAod(string fileName, int matchDay, int dayShift, float timeWindow[2], 
                end = oneLine.find(',', start);
                oneObs.aods[i] = (float)atof((oneLine.substr(start, end-start)).c_str());
             }
-
+               // Skip to the 25th column (index 25, last element)
+            
+            // Now end/start points to the AE column
+            start = end+1;
+            // end = oneLine.find(',', start);
+            oneObs.ae = (float)atof((oneLine.substr(start)).c_str());
             // Interpolate AOD at 0.550 µm
             const float interp_550_wavelengths[3] = {0.440, 0.500, 0.675};
             // Function to extract AOD values for the required wavelengths
@@ -422,11 +427,11 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
    int npix = count[0] * count[1];  // Total number of pixels
 
    // Allocate a single temporary buffer
-   float *tmpData = new float[npix];
+   float *tmpData = new Int16[npix];
 
    // Read land AOD
    dataSetName = "Aerosol_Optical_Thickness_550_Land_Best_Estimate";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -442,7 +447,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read ocean AOD
    dataSetName = "Aerosol_Optical_Thickness_550_Ocean_Best_Estimate";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -458,7 +463,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read land Angstrom Exponent
    dataSetName = "Angstrom_Exponent_Land_Best_Estimate";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -473,7 +478,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read ocean Angstrom Exponent
    dataSetName = "Angstrom_Exponent_Ocean_Best_Estimate";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -488,7 +493,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read Solar Zenith Angle
    dataSetName = "Solar_Zenith_Angle";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -497,7 +502,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read Viewing Zenith Angle
    dataSetName = "Viewing_Zenith_Angle";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -506,7 +511,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read Relative Azimuth Angle
    dataSetName = "Relative_Azimuth_Angle";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -515,7 +520,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read Scattering Angle
    dataSetName = "Scattering_Angle";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -524,12 +529,25 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read Quality Flag
    dataSetName = "Aerosol_Optical_Thickness_QA_Flag_Land";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
    }
-   memcpy(mr.qf + offset, tmpData, npix * sizeof(Int16));
+
+   for (int i = 0; i < npix; i++) {
+      if (mr.lndSea[offset + i] == 1) // land
+         mr.qf[offset + i] = tmpData[i];
+   }
+
+   // Read ocean QA
+   dataSetName = "Aerosol_Optical_Thickness_QA_Flag_Ocean";
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+   // ... error check ...
+   for (int i = 0; i < npix; i++) {
+      if (mr.lndSea[offset + i] == 0) // ocean
+         mr.qf[offset + i] = tmpData[i];
+   }
 
    // Clean up temporary buffer
    delete[] tmpData;
@@ -1537,6 +1555,8 @@ int matchup(string yyyymmdd, vector<OneDayAerAod>& aerData, map<float,string>& g
          int startIdx = -1;
          float sumAOD = 0.0;  // **Added: Sum of AOD values**
          float sumAODSquared = 0.0;  // **Added: Sum of squared AOD values**
+         float sumAE = 0.0;          // Sum of AE values
+         int nAE = 0;                // Count of valid AE values
          for (int i=0; i<(*ia).nmeas; i++) {
             if (((*ia).meas+i)->time >= timeWindow[0] && ((*ia).meas+i)->time <= timeWindow[1]) {
                float aod = ((*ia).meas + i)->aod550;  // Use the interpolated AOD at 0.550 µm
@@ -1545,10 +1565,21 @@ int matchup(string yyyymmdd, vector<OneDayAerAod>& aerData, map<float,string>& g
                   sumAODSquared += aod * aod;  // **Added: Accumulate squared AOD values**
                   nMeas++;
                   if(startIdx < 0) startIdx = i;
+                  // --- Add this block for AE ---
+                  float ae = ((*ia).meas + i)->ae;
+                  if (ae != -999.0 && !std::isnan(ae)) {
+                      sumAE += ae;
+                      nAE++;
+                  }
+                  // --- End AE block ---
                }
             }
             else if (((*ia).meas+i)->time > timeWindow[1]) break;
          }
+
+         float meanAE = (nAE > 0) ? sumAE / nAE : -999.0;
+         mr.mean_aeronet_ae = meanAE;
+
          if (nMeas == 0) {
             cout << "matchup(): AERONET nMeas == 0 for "+(*ia).staName << endl;
             freeMemForMatch(mr);

@@ -48,6 +48,7 @@ typedef struct {
    float time;  /* fractional hour (0-1)*/
    float aods[NUM_AERONET_WAVELENGTH];
    float aod550;  // interpoalted AOD at 0.55um */
+   float ae;      // 440-870 Angstrom Exponent
 } AerAod;
 
 typedef struct {  
@@ -83,6 +84,7 @@ typedef struct {
    float *satzen;
    float *satazi;
    float *aod550; // AOD at 550 nm all the pixels as array output
+   float mean_aeronet_ae;    //"440-870_Angstrom_Exponent"
    float satMean550;  // Mean satellite AOD at 550 nm
    float satStd550;   // Standard deviation of satellite AOD at 550 nm
    float *ae1;    // 0.55 vs 0.86um

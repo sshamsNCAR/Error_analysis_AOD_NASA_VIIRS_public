@@ -89,7 +89,7 @@ int main(int argc, char** argv)
    cout << "*******************************************" << outFile << endl;
    
    // Write CSV header
-   output << "date,nMeas,nPixs,satTime,staName,staLon,staLat,aerMean550,aerSTD550,satMean550,satSTD550,aod550,qf\n";
+   output << "date,nMeas,nPixs,satTime,staName,staLon,staLat,aerMean550,aerSTD550,mean_aeronet_ae,satMean550,satSTD550,aod550,qf\n";
    // Write match-up data
    for (vector<MatchupRecord>::iterator im = matchData.begin(); im != matchData.end(); ++im) {
       // creating array to have all the single aod of sat pixels to be in the csv file
@@ -120,10 +120,11 @@ int main(int argc, char** argv)
             << im->staLat << ","  // AERONET station coordinates
             << im->aerMean550 << ","  // Mean AERONET AOD at 550 nm
             << im->aerStd550 << ","   // Standard deviation of AERONET AOD at 550 nm
+            << im->mean_aeronet_ae << ","   // <th mean value for "440-870_Angstrom_Exponent" from AERONET
             << im->satMean550 << ","  // Mean satellite AOD at 550 nm
             << im->satStd550 << "," // Standard deviation of satellite AOD at 550 nm
             << "\"" << aod550_values.str() << "\","  // AOD at 550 nm for the pixel
-            << "\"" << qf_values.str() << "\"" ; // Quality flag for all pixels (enclosed in quotes);
+            << "\"" << qf_values.str() << "\"\n" ; // Quality flag for all pixels (enclosed in quotes);
             
    }
    // output.write(reinterpret_cast <const char*>(&nMatch),sizeof(int));

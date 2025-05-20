@@ -7,6 +7,5 @@
 #PBS -j oe
 #PBS -l select=1:ncpus=128:mpiprocs=128
 
-
-
-./batchrun.sh 2021 01 2022 365 > ../Bin/DB_batchrun.log 2>&1
+##./batchrun.sh 2021 01 2022 365 > ../Bin/DB_batchrun.log 2>&1
+./batchrun.sh 2023 01 2024 366 > ../Bin/DB_batchrun.log 2>&1

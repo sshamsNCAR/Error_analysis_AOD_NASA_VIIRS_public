@@ -84,8 +84,8 @@ def main():
 
     # Process files in batches
     #batch_size = 50
-    start_index = 0  # Start from file 50q
-    end_index = 400   # End at file 100
+    start_index = 800  # Start from file 50q
+    end_index = 1800   # End at file 100
 
     # Process the first batch (files 50 to 100)
     for file_path in all_files[start_index:end_index]:
