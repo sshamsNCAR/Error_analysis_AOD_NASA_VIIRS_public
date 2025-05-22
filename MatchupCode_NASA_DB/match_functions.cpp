@@ -427,11 +427,12 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
    int npix = count[0] * count[1];  // Total number of pixels
 
    // Allocate a single temporary buffer
-   float *tmpData = new Int16[npix];
+   //Int16 *tmpData = new Int16[npix];
+   float *tmpData = new float[npix];
 
    // Read land AOD
    dataSetName = "Aerosol_Optical_Thickness_550_Land_Best_Estimate";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -447,7 +448,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read ocean AOD
    dataSetName = "Aerosol_Optical_Thickness_550_Ocean_Best_Estimate";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -463,7 +464,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read land Angstrom Exponent
    dataSetName = "Angstrom_Exponent_Land_Best_Estimate";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -478,7 +479,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read ocean Angstrom Exponent
    dataSetName = "Angstrom_Exponent_Ocean_Best_Estimate";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -493,7 +494,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read Solar Zenith Angle
    dataSetName = "Solar_Zenith_Angle";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -502,7 +503,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read Viewing Zenith Angle
    dataSetName = "Viewing_Zenith_Angle";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -511,7 +512,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read Relative Azimuth Angle
    dataSetName = "Relative_Azimuth_Angle";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -520,7 +521,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read Scattering Angle
    dataSetName = "Scattering_Angle";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -529,7 +530,7 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read Quality Flag
    dataSetName = "Aerosol_Optical_Thickness_QA_Flag_Land";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
    if (status < 0) {
       delete[] tmpData;
       return PROC_FAIL;
@@ -542,10 +543,11 @@ int readDBAod(string aodFile, MatchupRecord& mr, int offset, const int *start,
 
    // Read ocean QA
    dataSetName = "Aerosol_Optical_Thickness_QA_Flag_Ocean";
-   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_SHORT, tmpData, 2, true, start, stride, count, block);
+
+   status = readH5Data(aodFile, dataSetName, H5T_NATIVE_FLOAT, tmpData, 2, true, start, stride, count, block);
    // ... error check ...
    for (int i = 0; i < npix; i++) {
-      if (mr.lndSea[offset + i] == 0) // ocean
+      if (mr.lndSea[offset + i] == 0) // ocean:
          mr.qf[offset + i] = tmpData[i];
    }
 
