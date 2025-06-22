@@ -123,37 +123,127 @@ string GetStdoutFromCommand(string cmd) {
 /******************************************************************************/
 
 // sshams added for interpolation to get AOD at 550 nm
-float interpolateAOD550(const float wavelengths[], const float aods[], int numWavelengths) {
-   float targetWavelength = 0.550;
+// float interpolateAOD550(const float wavelengths[], const float aods[], int numWavelengths) {
+//    float targetWavelength = 0.550;
 
-   // interpolation of 550 nm AOD using three wavenumbers 440, 500, and 675 nm
+//    // interpolation of 550 nm AOD using three wavenumbers 440, 500, and 675 nm
 
-   // Extract the three wavelengths and corresponding AOD values
-   float x[3] = {wavelengths[0], wavelengths[1], wavelengths[2]};
-   float y[3] = {aods[0], aods[1], aods[2]};
+//    // Extract the three wavelengths and corresponding AOD values
+//    float x[3] = {wavelengths[0], wavelengths[1], wavelengths[2]};
+//    float y[3] = {aods[0], aods[1], aods[2]};
 
-   // Check for invalid AOD values (-999)
-   for (int i = 0; i < 3; i++) {
-      if (y[i] == -999) {
-         return -999.0;  // Return -999 if any AOD value is invalid
-      }
-   }
+//    // Check for invalid AOD values (-999)
+//    for (int i = 0; i < 3; i++) {
+//       if (y[i] == -999) {
+//          return -999.0;  // Return -999 if any AOD value is invalid
+//       }
+//    }
 
-   // Perform cubic spline interpolation
-   // Calculate coefficients for the cubic polynomial
-   float a = y[0];
-   float b = (y[1] - y[0]) / (x[1] - x[0]);
-   float c = ((y[2] - y[1]) / (x[2] - x[1]) - b) / (x[2] - x[0]);
-   float d = ((y[2] - y[1]) / (x[2] - x[1]) - b) / ((x[2] - x[0]) * (x[2] - x[1]));
+//    // Perform cubic spline interpolation
+//    // Calculate coefficients for the cubic polynomial
+//    float a = y[0];
+//    float b = (y[1] - y[0]) / (x[1] - x[0]);
+//    float c = ((y[2] - y[1]) / (x[2] - x[1]) - b) / (x[2] - x[0]);
+//    float d = ((y[2] - y[1]) / (x[2] - x[1]) - b) / ((x[2] - x[0]) * (x[2] - x[1]));
 
-   // Interpolate for 550 nm
-   float dx = targetWavelength - x[0];
-   float interpolatedAOD = a + b * dx + c * dx * dx + d * dx * dx * dx;
+//    // Interpolate for 550 nm
+//    float dx = targetWavelength - x[0];
+//    float interpolatedAOD = a + b * dx + c * dx * dx + d * dx * dx * dx;
 
-   return interpolatedAOD;
+//    return interpolatedAOD;
 
    
+// }
+
+// sshams added for interpolation to get AOD at 550 nm using Eck et polynomial fit of log(AOD) vs log(wavelength)
+// interpolateAOD550_logPoly
+
+// C++ function for log-log quadratic interpolation at 550 nm
+float interpolateAOD550(const float wavelengths[], const float aods[], int numWavelengths) {
+    // Fill value for missing or invalid result
+    const float fill_value = -999.0f;
+
+    // Temporary arrays for valid data
+    float x[3], y[3];
+    int valid = 0;
+
+    // Filter valid AODs (exclude fill values and non-physical values)
+    for (int i = 0; i < numWavelengths; ++i) {
+        if (aods[i] > 0 && aods[i] < 10 && aods[i] != 9999.0f && aods[i] != -9999.0f) {
+            x[valid] = wavelengths[i];
+            y[valid] = aods[i];
+            valid++;
+            if (valid == 3) break; // Only need 3 points
+        }
+    }
+
+    // Need exactly 3 valid points for quadratic interpolation
+    if (valid < 3) return fill_value;
+
+    // Log-log transform
+    float lx[3], ly[3];
+    for (int i = 0; i < 3; ++i) {
+        lx[i] = log(x[i]);
+        ly[i] = log(y[i]);
+    }
+    float lx0 = log(0.550f);
+
+    // Solve for a, b, c in y = a*x^2 + b*x + c (in log-log space)
+    float x1 = lx[0], x2 = lx[1], x3 = lx[2];
+    float y1 = ly[0], y2 = ly[1], y3 = ly[2];
+
+    float denom = (x1-x2)*(x1-x3)*(x2-x3);
+    if (denom == 0) return fill_value; // Prevent division by zero
+
+    float a = (x3*(y2-y1) + x2*(y1-y3) + x1*(y3-y2)) / denom;
+    float b = (x3*x3*(y1-y2) + x2*x2*(y3-y1) + x1*x1*(y2-y3)) / denom;
+    float c = (x2*x3*(x2-x3)*y1 + x3*x1*(x3-x1)*y2 + x1*x2*(x1-x2)*y3) / denom;
+
+    float logy0 = a*lx0*lx0 + b*lx0 + c;
+    float y0 = exp(logy0);
+
+
+    return y0;
 }
+// float interpolateAOD550(const float wavelengths[], const float aods[], int numWavelengths) {
+//     if (numWavelengths < 3) {
+//         return -999.0; // Not enough points to fit a quadratic
+//     }
+
+//     const float targetWavelength =0.550f;
+//     float logLambda[3];
+//     float logAOD[3];
+
+//     // Convert to log-log space and check for invalid AOD values
+//     for (int i = 0; i < 3; ++i) {
+//         if (aods[i] <= 0 || wavelengths[i] <= 0 || aods[i] == -999.0f) {
+//             return -999.0f; // Invalid input
+//         }
+//         logLambda[i] = std::log(wavelengths[i]);
+//         logAOD[i] = std::log(aods[i]);
+//     }
+
+//     // Solve for coefficients of the quadratic: y = a*x^2 + b*x + c
+//     float x0 = logLambda[0], x1 = logLambda[1], x2 = logLambda[2];
+//     float y0 = logAOD[0], y1 = logAOD[1], y2 = logAOD[2];
+
+//     float denom = (x0 - x1)*(x0 - x2)*(x1 - x2);
+//     if (denom == 0.0f) {
+//         return -999.0f; // Prevent division by zero
+//     }
+
+//     float a = (x2*(y1 - y0) + x1*(y0 - y2) + x0*(y2 - y1)) / denom;
+//     float b = (x2*x2*(y0 - y1) + x1*x1*(y2 - y0) + x0*x0*(y1 - y2)) / denom;
+//     float c = (x1*x2*(x1 - x2)*y0 + x2*x0*(x2 - x0)*y1 + x0*x1*(x0 - x1)*y2) / denom;
+
+//     // Interpolate at log(550)
+//     float log550 = std::log(targetWavelength);
+//     float logAOD550 = a * log550 * log550 + b * log550 + c;
+
+//     // Convert back from log-space
+//     return std::exp(logAOD550);
+// }
+
 /******************************************************************************/
 /* 
    Get AERONET data within a give time window

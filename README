@@ -26,7 +26,7 @@ batchrun.sh (which creates the station_location.txt for each day and then run th
 batchjon_run.pbs (and to use a computational node)
 
 Download all aeronet data from 
-https://aeronet.gsfc.nasa.gov/new_web/download_all_v3_inversions.html
+https://aeronet.gsfc.nasa.gov/new_web/download_all_v3_aod.html
 
 Then I created a python code that convert .lv15 for each station into the format that code is looking for, which is for each day had the station name in yyyy/day/ directory format
 conversion code:/glade/u/home/sshams/code/AFRICA_SERVIR/Error_analysis_AOD_NASA/create_formatted_aeronet_data.py

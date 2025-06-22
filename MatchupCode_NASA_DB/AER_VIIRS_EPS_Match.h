@@ -15,7 +15,8 @@ using namespace std;
 
 /****** Data  Paths ******/
 // const string AERONET_PATH="../Data/AERONET/";
-const string AERONET_PATH="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/";
+// const string AERONET_PATH="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/";
+const string AERONET_PATH="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level2_All_Points_V3/formatted/";
 //const string AOD_PATH="/data/data314/hliu/DATA/VIIRS_NASA/AERDT_L2_VIIRS_SNPP/";  // YYYY/DDD/AERDT_L2_VIIRS_SNPP.A2012333.2306.011.2020200031009.nc
 //const string MATCH_PATH="../Data/MATCHUP_DT/";
 //const string AOD_PATH="/data/data314/hliu/DATA/VIIRS_NASA/AERDB_L2_VIIRS_SNPP/";  // YYYY/DDD/AERDB_L2_VIIRS_SNPP.A2012333.2306.011.2020200031009.nc
@@ -23,7 +24,7 @@ const string AERONET_PATH="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/A
 // const string AOD_PATH="/data/data314/hliu/DATA/VIIRS_NASA/AERDB_L2_VIIRS_NOAA20/";  // YYYY/DDD/AERDB_L2_VIIRS_NOAA20.A2023004.2124.002.2023080160611.nc
 const string AOD_PATH="/glade/campaign/acom/acom-da/SERVIR/VIIRS/python_download_buffer/data-ingest/viirs_data/";
 // const string MATCH_PATH="../Data/MATCHUP_DB_NOAA20/";
-const string MATCH_PATH="/glade/campaign/acom/acom-da/SERVIR/match_aeronet_viirs/matched_DB_1hours_TW/";
+const string MATCH_PATH="/glade/campaign/acom/acom-da/SERVIR/match_aeronet_viirs/matched_DB_1hours_TW_lev2/";
 /****** AERONET  Constants (V3) *******/
 const int NUM_AERONET_WAVELENGTH = 22;
 const float AERONET_WAVELENGTH[NUM_AERONET_WAVELENGTH] = 

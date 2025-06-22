@@ -14,13 +14,14 @@ using namespace std;
 #endif
 
 /****** Data  Paths ******/
-const string AERONET_PATH="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/";
+// const string AERONET_PATH="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/";
+const string AERONET_PATH="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level2_All_Points_V3/formatted/";
 //const string AOD_PATH="/data/data314/hliu/DATA/VIIRS_NASA/AERDT_L2_VIIRS_SNPP/";  // YYYY/DDD/AERDT_L2_VIIRS_SNPP.A2012333.2306.011.2020200031009.nc
 //const string MATCH_PATH="../Data/MATCHUP_DT/";
 const string AOD_PATH="/glade/campaign/acom/acom-da/SERVIR/VIIRS/python_download_buffer/data-ingest/viirs_data/";  // YYYY/DDD/AERDT_L2_VIIRS_NOAA20.A2024003.0824.002.2024003210456.nc
 // const string MATCH_PATH="/glade/u/home/sshams/code/AFRICA_SERVIR/Error_analysis_AOD_NASA/Data/MATCHUP_DT/";
-const string MATCH_PATH="/glade/campaign/acom/acom-da/SERVIR/match_aeronet_viirs/matched_DT_1hours_TW/"; // we are using differnet time window for matching and save the data in different folder
-
+// const string MATCH_PATH="/glade/campaign/acom/acom-da/SERVIR/match_aeronet_viirs/matched_DT_1hours_TW/"; // we are using differnet time window for matching and save the data in different folder
+const string MATCH_PATH="/glade/campaign/acom/acom-da/SERVIR/match_aeronet_viirs/matched_DT_1hours_TW_lev2/";
 
 
 /****** AERONET  Constants (V3) *******/

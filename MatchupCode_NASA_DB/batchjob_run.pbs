@@ -1,5 +1,5 @@
 #!/bin/bash -l
-#PBS -N real
+#PBS -N DB_matchVIIRS
 #PBS -A NSAP0003 
 #PBS -q main
 #PBS -l walltime=00:30:00
@@ -7,5 +7,6 @@
 #PBS -j oe
 #PBS -l select=1:ncpus=128:mpiprocs=128
 
+./batchrun.sh 2020 01 2020 366 > ../Bin/DB_batchrun.log 2>&1
 ##./batchrun.sh 2021 01 2022 365 > ../Bin/DB_batchrun.log 2>&1
-./batchrun.sh 2023 01 2024 366 > ../Bin/DB_batchrun.log 2>&1
+##./batchrun.sh 2023 01 2024 366 > ../Bin/DB_batchrun.log 2>&1

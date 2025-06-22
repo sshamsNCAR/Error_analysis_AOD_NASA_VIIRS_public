@@ -4,8 +4,11 @@
 
 # Paths
 AFRICA_LIST="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/aeronet_stations_africa_2021_2025.txt"
-DATA_DIR="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/"
-OUTPUT_DIR="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/"
+#DATA_DIR="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/"
+DATA_DIR="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level2_All_Points_V3/formatted/"
+#OUTPUT_DIR="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for/"
+OUTPUT_DIR="/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level2_All_Points_V3/formatted/"
+
 MATCH_code_dir="/glade/u/home/sshams/code/AFRICA_SERVIR/Error_analysis_AOD_NASA/Bin/match_viirs_db_n20"
 # exec > /glade/u/home/sshams/code/AFRICA_SERVIR/Error_analysis_AOD_NASA/Bin/match_viirs_dt_n20/DB_batchrun.log 2>&1
 

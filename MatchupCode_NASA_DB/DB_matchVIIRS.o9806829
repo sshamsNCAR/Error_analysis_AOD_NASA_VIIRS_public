@@ -1,0 +1,130 @@
+
+Currently Loaded Modules:
+  1) ncarenv/24.12 (S)
+
+  Where:
+   S:  Module is Sticky, requires --force to unload or purge
+
+ 
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "intel-classic/2023.2.1"
+   Try: "module spider intel-classic/2023.2.1" to see how to load the
+module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "ncarcompilers/1.0.0"
+   Try: "module spider ncarcompilers/1.0.0" to see how to load the module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "cray-mpich/8.1.27"
+   Try: "module spider cray-mpich/8.1.27" to see how to load the module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "netcdf/4.9.2"
+   Try: "module spider netcdf/4.9.2" to see how to load the module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "parallel-netcdf/1.12.3"
+   Try: "module spider parallel-netcdf/1.12.3" to see how to load the
+module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "hdf5/1.12.2"
+   Try: "module spider hdf5/1.12.2" to see how to load the module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "udunits/2.2.28"
+   Try: "module spider udunits/2.2.28" to see how to load the module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "mkl"
+   Try: "module spider mkl" to see how to load the module(s).
+
+
+
+/glade/work/rkumar/idl_met/idl_guide5/guide5.sh: line 17: alias: -x: invalid option
+alias: usage: alias [-p] [name[=value] ... ]
+/glade/work/rkumar/idl_met/idl_guide5/guide5.sh: line 18: alias: -x: invalid option
+alias: usage: alias [-p] [name[=value] ... ]
+/glade/work/rkumar/idl_met/idl_guide5/guide5.sh: line 19: alias: -x: invalid option
+alias: usage: alias [-p] [name[=value] ... ]
+
+Currently Loaded Modules:
+  1) ncarenv/24.12 (S)
+
+  Where:
+   S:  Module is Sticky, requires --force to unload or purge
+
+ 
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "intel-classic/2023.2.1"
+   Try: "module spider intel-classic/2023.2.1" to see how to load the
+module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "ncarcompilers/1.0.0"
+   Try: "module spider ncarcompilers/1.0.0" to see how to load the module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "cray-mpich/8.1.27"
+   Try: "module spider cray-mpich/8.1.27" to see how to load the module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "netcdf/4.9.2"
+   Try: "module spider netcdf/4.9.2" to see how to load the module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "parallel-netcdf/1.12.3"
+   Try: "module spider parallel-netcdf/1.12.3" to see how to load the
+module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "hdf5/1.12.2"
+   Try: "module spider hdf5/1.12.2" to see how to load the module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "udunits/2.2.28"
+   Try: "module spider udunits/2.2.28" to see how to load the module(s).
+
+
+
+Lmod has detected the following error: These module(s) or extension(s) exist
+but cannot be loaded as requested: "mkl"
+   Try: "module spider mkl" to see how to load the module(s).
+
+
+
+/glade/work/rkumar/idl_met/idl_guide5/guide5.sh: line 17: alias: -x: invalid option
+alias: usage: alias [-p] [name[=value] ... ]
+/glade/work/rkumar/idl_met/idl_guide5/guide5.sh: line 18: alias: -x: invalid option
+alias: usage: alias [-p] [name[=value] ... ]
+/glade/work/rkumar/idl_met/idl_guide5/guide5.sh: line 19: alias: -x: invalid option
+alias: usage: alias [-p] [name[=value] ... ]

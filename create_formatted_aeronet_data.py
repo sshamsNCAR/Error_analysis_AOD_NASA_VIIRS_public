@@ -4,7 +4,11 @@ from datetime import datetime
 
 # Define paths
 input_dir = "/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/AOD/AOD15/ALL_POINTS/"
-output_dir = "/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/for"
+#level 2 data
+input_dir = "/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level2_All_Points_V3/AOD20/ALL_POINTS/"
+output_dir = "/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level2_All_Points_V3/formatted/"
+# level = "lev15"  # Change to "1.5" for Level 1.5 data
+level = "lev20"  # Change to "2" for Level 2 data
 
 AERONET_WAVELENGTHS = [1.640, 1.020, 0.870, 0.865, 0.779, 0.675, 0.667, 0.620,
                        0.560, 0.555, 0.551, 0.532, 0.531, 0.510, 0.500, 0.490,
@@ -24,9 +28,10 @@ def process_aeronet_file(file_path):
     """Process a single .lev15 file and generate formatted .dat files."""
     # Extract station name from the file name
     file_name = os.path.basename(file_path)
-    station_name = "_".join(file_name.split("_")[2:]).replace(".lev15", "")
+    station_name = "_".join(file_name.split("_")[2:]).replace("."+level, "")
+    
 
-    # Read the .lev15 file
+    # Read the .lev15 or lev 2 file
     try:
         data = pd.read_csv(file_path, skiprows=6, delimiter=",", engine="python",  encoding="ISO-8859-1")
     except Exception as e:
@@ -72,11 +77,11 @@ def process_aeronet_file(file_path):
             print(f"Error processing row in file {file_path}: {e}")
 
 def main():
-    # Process all .lev15 files in the input directory
+    # Process all aeronet data (.lev15 or .lev20) files in the input directory
     all_files = []
     for root, _, files in os.walk(input_dir):
         for file in files:
-            if file.endswith(".lev15"):
+            if file.endswith("." + level):
                 all_files.append(os.path.join(root, file))
                 #process_aeronet_file(file_path)
      # Sort files for consistent processing
