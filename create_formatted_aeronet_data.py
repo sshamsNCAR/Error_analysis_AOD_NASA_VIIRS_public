@@ -3,10 +3,10 @@ import pandas as pd
 from datetime import datetime
 
 # Define paths
-input_dir = "/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level15_All_Points_V3/AOD/AOD15/ALL_POINTS/"
+input_dir = "/AOD_Level15_All_Points_V3/AOD/AOD15/ALL_POINTS/"
 #level 2 data
-input_dir = "/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level2_All_Points_V3/AOD20/ALL_POINTS/"
-output_dir = "/glade/campaign/acom/acom-da/SERVIR/ind-obs/aeronet/AOD_Level2_All_Points_V3/formatted/"
+input_dir = "/AOD_Level2_All_Points_V3/AOD20/ALL_POINTS/"
+output_dir = "/AOD_Level2_All_Points_V3/formatted/"
 # level = "lev15"  # Change to "1.5" for Level 1.5 data
 level = "lev20"  # Change to "2" for Level 2 data
 
